@@ -1,12 +1,13 @@
 const request = require('request');
 var air_data = require("./models/air_data_model") 
+var crop_data = require('./models/crop_data_model')
 const bodyparser = require('body-parser');
 var axios = require('axios')
 require('dotenv').config();
 const express = require('express')
 let app = express()
 const mongoose = require('mongoose');
-
+var crop_data = require("./models/crop_data_model")
 const api_key = process.env.API_KEY;
 
  mongoose.connect('mongodb://localhost/test', {useNewUrlParser: true});
@@ -39,24 +40,32 @@ console.log("///////////////////////////////////////////////////////////////////
 
 db.on('error', console.error.bind(console, 'conncetions error'));
 async function p(){
-     await air_data.deleteMany({}, (err)=>console.log("err: ", err))
+    await air_data.deleteMany({}, (err)=>console.log("err: ", err));
     
     await axios.get(`https://api.data.gov.in/resource/3b01bcb8-0b14-4abf-b6f2-c1bfd384ba69?api-key=${api_key}&format=json&offset=1&limit=1399`)
     .then( res =>{ 
        console.log("log")
-        // console.log(res.data.records)        
-    //     air_data.insertMany(res.data.records, err => {if(err){console.log("inserting err: ", err)}})     //   db.close(()=>console.log("done ensrting exitin     
+         console.log(res.data.records)        
+         air_data.insertMany(res.data.records, err => {if(err){console.log("inserting err: ", err)}})     //   db.close(()=>console.log("done ensrting exitin     
     })
     .catch( err => console.log(err))
-//    .then(db.close( () =>console.log('done')))
-}   
+    // https://api.data.gov.in/resource/9ef84268-d588-465a-a308-a864a43d0070?api-key=${api_key}&format=json&offset=0&limit=1
+    //    .then(db.close( () =>console.log('done')))
+    await crop_data.deleteMany({}, (err)=>console.log('err: ', err))
+    await axios.get(`https://api.data.gov.in/resource/9ef84268-d588-465a-a308-a864a43d0070?api-key=${api_key}&format=json&offset=0&limit=1300`)
+    .then( res =>{ 
+       console.log("log")
+        console.log(res.data.records)        
+	    crop_data.insertMany(res.data.records, err => {if(err){console.log("inserting err: ", err)}else{console.log("success")}})     //   db.close(()=>console.log("done ensrting exitin     
+    	})
+	}
 p();
 
 // air_data.find().where('_id').exec((err, res)=>console.log("this ", res))
 
 setTimeout(function(){
     db.close(()=>console.log("done exiting"))
-}, 12000)
+}, 20000)
     
 
 
